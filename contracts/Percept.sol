@@ -5,6 +5,7 @@ pragma solidity ^0.4.0;
 contract Percept {
 
     mapping(bytes32 => Proof) public proofs;    // Proof storage mappings (key => value data)
+    bytes32[] public submittedMappings;
 
     struct Proof {              // Proof data type
         // Pre-release data
@@ -21,36 +22,47 @@ contract Percept {
         uint releaseBlockNum;   // Latest block number during proof release
     }
 
+    event ProofCreated(bytes32 proofMapping);
+    event ProofRevealed(bytes32 proofMapping);
+
     // Function to submit a new unreleased proof
     // Param: hash (32 bytes) - Hash of the proof text
-    function submitProof(bytes32 hash) public {
+    function submitProof(bytes32 hash) public returns (bytes32) {
         uint timestamp = now;   // Current unix timestamp
         uint blockNum = block.number;   // Current block number this transaction is in
 
-        bytes32 proofMapping = keccak256(msg.sender, timestamp, blockNum, hash);    // Mapping hash of proof data
+        bytes32 proofMapping = keccak256(abi.encodePacked(msg.sender, timestamp, blockNum, hash));    // Mapping hash of proof data
 
-        // Construct the proof in memory, unreleased
-        Proof memory proof = Proof(msg.sender, hash, timestamp, blockNum, proofMapping, "", false, 0, 0);
+        // Construct the proof in storage, unreleased
+        Proof storage proof = proofs[proofMapping];
 
-        // Store the proof in the contract mapping storage
-        proofs[proofMapping] = proof;
+        proof.creator = msg.sender;
+        proof.hash = hash;
+        proof.timestamp = timestamp;
+        proof.blockNum = blockNum;
+        proof.proofMapping = proofMapping;
+
+        submittedMappings.push(proofMapping);
+        emit ProofCreated(proofMapping); // Trigger an event for the generated proof mapping
     }
 
     // Release the contents of a submitted proof
     // Param: proofMapping (32 bytes) - The key to lookup the proof
     // Param: release (string) - The text that was originally hashed
     function releaseProof(bytes32 proofMapping, string release) public {
-        // Load the unreleased proof into memory
-        Proof memory proof = proofs[proofMapping];
+        // Load the unreleased proof from storage
+        Proof storage proof = proofs[proofMapping];
 
         require(msg.sender == proof.creator);       // Ensure the releaser was the creator
-        require(proof.hash == keccak256(release));  // Ensure the release string's hash is the same as the proof
+        require(proof.hash == keccak256(abi.encodePacked(release)));  // Ensure the release string's hash is the same as the proof
         require(!proof.released);                   // Ensure the proof isn't released yet
 
         proof.release = release;                // Release the proof text
         proof.released = true;                  // Set proof released flag to true
         proof.releaseTime = now;                // Set the release unix timestamp to now
         proof.releaseBlockNum = block.number;   // Set the release block number to the current block number
+
+        emit ProofRevealed(proofMapping);
     }
 
     // Function to determine whether a proof is valid for a certain verification string
@@ -62,7 +74,7 @@ contract Percept {
 
         require(proof.creator != 0); // Ensure the proof exists
 
-        return proof.hash == keccak256(verify); // Return whether the proof hash matches the verification's hash
+        return proof.hash == keccak256(abi.encodePacked(verify)); // Return whether the proof hash matches the verification's hash
     }
 
     // Functon to retrieve a proof that has not been completed yet
@@ -71,6 +83,7 @@ contract Percept {
     function retrieveIncompleteProof(bytes32 proofMapping) public view returns (
         address creator,
         bytes32 hash,
+        bytes32 pMapping,
         uint timestamp,
         uint blockNum
     ) {
@@ -80,10 +93,11 @@ contract Percept {
 
         // Return the collective proof data individually
         return (
-            proof.creator,
-            proof.hash,
-            proof.timestamp,
-            proof.blockNum
+        proof.creator,
+        proof.hash,
+        proof.proofMapping,
+        proof.timestamp,
+        proof.blockNum
         );
     }
 
@@ -94,6 +108,7 @@ contract Percept {
         address creator,
         string release,
         bytes32 hash,
+        bytes32 pMapping,
         uint timestamp,
         uint releaseTime,
         uint blockNum,
@@ -105,14 +120,67 @@ contract Percept {
 
         // Return the collective proof data individually
         return (
-            proof.creator,
-            proof.release,
-            proof.hash,
-            proof.timestamp,
-            proof.releaseTime,
-            proof.blockNum,
-            proof.releaseBlockNum
+        proof.creator,
+        proof.release,
+        proof.hash,
+        proof.proofMapping,
+        proof.timestamp,
+        proof.releaseTime,
+        proof.blockNum,
+        proof.releaseBlockNum
         );
+    }
+
+    function retrieveRawProof(bytes32 proofMapping) public view returns (
+        address creator,
+        string release,
+        bytes32 hash,
+        bytes32 pMapping,
+        uint timestamp,
+        uint releaseTime,
+        uint blockNum,
+        uint releaseBlockNum
+    ) {
+        Proof memory proof = proofs[proofMapping];  // Load the proof into memory
+
+        // Return the collective proof data individually
+        return (
+        proof.creator,
+        proof.release,
+        proof.hash,
+        proof.proofMapping,
+        proof.timestamp,
+        proof.releaseTime,
+        proof.blockNum,
+        proof.releaseBlockNum
+        );
+    }
+
+    function retrieveIncompleteProofByIndex(uint index) public view returns (
+        address creator,
+        bytes32 hash,
+        bytes32 proofMapping,
+        uint timestamp,
+        uint blockNum
+    ) {
+        return retrieveIncompleteProof(submittedMappings[index]);
+    }
+
+    function retrieveCompletedProofByIndex(uint index) public view returns (
+        address creator,
+        string release,
+        bytes32 hash,
+        bytes32 proofMapping,
+        uint timestamp,
+        uint releaseTime,
+        uint blockNum,
+        uint releaseBlockNum
+    ) {
+        return retrieveCompletedProof(submittedMappings[index]);
+    }
+
+    function getSubmittedMappings() public view returns (bytes32[]) {
+        return submittedMappings;
     }
 
 }

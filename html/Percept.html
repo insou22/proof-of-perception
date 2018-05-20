@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+
+    // IF YOU ARE USING YOUR OWN BLOCKCHAIN / DEPLOYED CONTRACT, MAKE SURE TO
+    // UPDATE THIS BELOW VARIABLE TO YOUR NEW PERSONAL CONTRACT ADDRESS
+    const CONTRACT_ADDRESS = "0x53050fc2232dfbfbcfcbe8b696af3e55ed94d796";
+
+    const CONTRACT_ABI = JSON.parse(`[
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "release",
+				"type": "string"
+			}
+		],
+		"name": "releaseProof",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			}
+		],
+		"name": "retrieveCompletedProof",
+		"outputs": [
+			{
+				"name": "creator",
+				"type": "address"
+			},
+			{
+				"name": "release",
+				"type": "string"
+			},
+			{
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"name": "pMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"name": "releaseTime",
+				"type": "uint256"
+			},
+			{
+				"name": "blockNum",
+				"type": "uint256"
+			},
+			{
+				"name": "releaseBlockNum",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "proofs",
+		"outputs": [
+			{
+				"name": "creator",
+				"type": "address"
+			},
+			{
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"name": "blockNum",
+				"type": "uint256"
+			},
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "release",
+				"type": "string"
+			},
+			{
+				"name": "released",
+				"type": "bool"
+			},
+			{
+				"name": "releaseTime",
+				"type": "uint256"
+			},
+			{
+				"name": "releaseBlockNum",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			}
+		],
+		"name": "retrieveIncompleteProof",
+		"outputs": [
+			{
+				"name": "creator",
+				"type": "address"
+			},
+			{
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"name": "pMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"name": "blockNum",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "retrieveIncompleteProofByIndex",
+		"outputs": [
+			{
+				"name": "creator",
+				"type": "address"
+			},
+			{
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"name": "blockNum",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			}
+		],
+		"name": "retrieveRawProof",
+		"outputs": [
+			{
+				"name": "creator",
+				"type": "address"
+			},
+			{
+				"name": "release",
+				"type": "string"
+			},
+			{
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"name": "pMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"name": "releaseTime",
+				"type": "uint256"
+			},
+			{
+				"name": "blockNum",
+				"type": "uint256"
+			},
+			{
+				"name": "releaseBlockNum",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "submittedMappings",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "hash",
+				"type": "bytes32"
+			}
+		],
+		"name": "submitProof",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "verify",
+				"type": "string"
+			}
+		],
+		"name": "isValidProof",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "retrieveCompletedProofByIndex",
+		"outputs": [
+			{
+				"name": "creator",
+				"type": "address"
+			},
+			{
+				"name": "release",
+				"type": "string"
+			},
+			{
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"name": "proofMapping",
+				"type": "bytes32"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"name": "releaseTime",
+				"type": "uint256"
+			},
+			{
+				"name": "blockNum",
+				"type": "uint256"
+			},
+			{
+				"name": "releaseBlockNum",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getSubmittedMappings",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes32[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "proofMapping",
+				"type": "bytes32"
+			}
+		],
+		"name": "ProofCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "proofMapping",
+				"type": "bytes32"
+			}
+		],
+		"name": "ProofRevealed",
+		"type": "event"
+	}
+]`);
+
+const ORIGINAL_ACTION = `<p>What would you like to do today?</p>
+      	<button type="button" id="create-proof" class="btn btn-success">Create a new proof</button>
+      	<button type="button" id="verify-proof" class="btn btn-primary">Verify an existing proof</button>
+      	<button type="button" id="reveal-proof" class="btn btn-warning">Reveal an existing proof</button>`;
+
+const LOADING_ICON = `<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> `;
+
+	const contract = web3.eth.contract(CONTRACT_ABI);
+	const Percept = contract.at(CONTRACT_ADDRESS);
+
+	const metaPrint = function(err, res) {
+		console.log("ERR: ");
+		console.log(err);
+		console.log("RES: ");
+		console.log(res);
+	};
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Proof of Perception</title>
+    <link rel="icon" href="https://percept.site/favicon.ico?v=0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+    <style>/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  line-height: 60px; /* Vertically center the text there */
+  background-color: #f5f5f5;
+}
+
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+.container {
+  width: auto;
+  max-width: 680px;
+  padding: 0 15px;
+}
+
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+</style>
+
+</head>
+<body>
+<!-- Begin page content -->
+<div class="container">
+    <div class="mt-1">
+        <h1>Proof of Perception</h1>
+    </div>
+    <p class="lead">Create interactive proofs of former perception. This website acts as a bridge to the Ethereum Blockchain Smart Contract.</p>
+    <div id="action-content" class="container">
+        <p>What would you like to do today?</p>
+        <button type="button" id="create-proof" class="btn btn-success">Create a new proof</button>
+        <button type="button" id="verify-proof" class="btn btn-primary">Verify an existing proof</button>
+        <button type="button" id="reveal-proof" class="btn btn-warning">Reveal an existing proof</button>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <span class="text-muted">Created by Zac Kologlu for Software Major Work 2018</span>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+var running = false;
+
+if (typeof web3 !== 'undefined') {
+  web3 = new Web3(web3.currentProvider);
+  running = true;
+} else {
+    swal("Error - No Web3", "Check if Metamask is locked or ensure that you have a Web3 enabled wallet in your browser", "error");
+}
+
+
+$(document).on("click", "#create-proof", function(event) {
+
+	$("#action-content").html(`
+
+  			<div class="form-group">
+    				<label for="proof-text">Proof text</label>
+				<textarea class="form-control" id="proof-text" rows="3"></textarea>
+	    			<small id="proof-help" class="form-text text-muted">This text will not be revealed until you choose to do so.</small>
+			</div>
+			<div class="form-group">
+    				<label for="gas-selector">Gas price (gwei)</label>
+			        <select class="form-control" id="gas-selector">
+			        	<option>1</option>
+			        	<option>2</option>
+			        	<option>3</option>
+			        	<option>4</option>
+			        	<option>5</option>
+			        	<option>6</option>
+			        	<option>7</option>
+			        	<option>8</option>
+			        	<option>9</option>
+			        	<option>10</option>
+			        	<option>11</option>
+			        	<option>12</option>
+			        	<option>13</option>
+			        	<option>14</option>
+			        	<option>15</option>
+			        	<option>16</option>
+			        	<option>17</option>
+			        	<option>18</option>
+			        	<option>19</option>
+			        	<option>20</option>
+			        </select>
+			        <small id="gas-help" class="form-text text-muted">The higher the gas price, the more you will pay, but the sooner your transaction will be confirmed.</small>
+			</div>
+			<button id="submit-proof" type="button" class="btn btn-primary">Submit</button>
+			<button id="cancel-action" type="button" class="btn btn-danger">Cancel</button>
+
+	`);
+
+	$("#submit-proof").on("click", function(event) {
+
+		$("#submit-proof").html(LOADING_ICON + "Loading...");
+		$("#submit-proof").attr("disabled", "");
+		$("#cancel-action").remove();
+
+		createProof($("#proof-text").val(), $("#gas-selector").val());
+	});
+
+});
+
+$(document).on("click", "#verify-proof", function(event) {
+
+	$("#action-content").html(`
+
+  			<div class="form-group">
+    				<label for="proof-text">Proof key</label>
+				<input class="form-control" type="text" id="proof-key"></input>
+			</div>
+
+			<div class="form-group">
+    				<label for="supposed-text">Supposed text</label>
+				<textarea class="form-control" id="supposed-text" rows="3" placeholder="(Optional): No need to fill this in if the proof has already been released"></textarea>
+	    			<small id="proof-help" class="form-text text-muted">This text will not be sent outside your PC.</small>
+			</div>
+			<button id="verify-proof" type="button" class="btn btn-primary">Verify</button>
+			<button id="cancel-action" type="button" class="btn btn-danger">Cancel</button>
+
+	`);
+
+	$("#verify-proof").on("click", function(event) {
+
+		var pKey = $("#proof-key").val();
+		if (!pKey.startsWith("0x")) {
+			pKey = "0x" + pKey;
+		}
+
+		var text = $("#supposed-text").val();
+
+		console.log(Percept.isValidProof);
+
+		console.log("KEY: " + web3.toHex(pKey));
+		console.log("TEXT: " + text);
+
+		if (text) {
+
+		Percept.retrieveRawProof(web3.toHex(pKey), (err, res) => {
+			console.log(err);
+			console.log(res);
+
+			if (res[0] == "0x0000000000000000000000000000000000000000") {
+				$("#action-content").html(`
+					<h4>Proof does not exist</h4>
+					<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+				`);
+			} else if (res[2] == web3.sha3(web3.toHex(text))) {
+				if (!res[1]) {
+					$("#action-content").html(`
+						<h4>Proof is valid but not yet revealed!</h4>
+						<h6>Proved by: ` + res[0] + `</h6>
+						<h6>Proof contents:</h6>
+						<a style="color:green">` + text + `</a>
+						<h6></h6>
+						<h6>Proof hash: ` + res[2] + `</h6>
+						<h6>Proof key: ` + res[3] + `</h6>
+						<h6>Proof date: ` + convertTimestamp(res[4]) + `</h6>
+						<h6>Proof block number: ` + res[6] + `</h6>
+						<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+					`);
+				} else {
+					$("#action-content").html(`
+					<h4>Proof is revealed!</h4>
+					<h6>Proved by: ` + res[0] + `</h6>
+					<h6>Proof contents:</h6>
+					<a style="color:green">` + web3.toUtf8(res[1]) + `</a>
+						<h6></h6>
+					<h6>Proof hash: ` + res[2] + `</h6>
+					<h6>Proof key: ` + res[3] + `</h6>
+					<h6>Proof date: ` + convertTimestamp(res[4]) + `</h6>
+					<h6>Proof block number: ` + res[6] + `</h6>
+					<h6>Reveal date: ` + convertTimestamp(res[5]) + `</h6>
+					<h6>Reveal block number: ` + res[7] + `</h6>
+					`);
+				}
+			} else {
+				$("#action-content").html(`
+					<h4>Proof exists, but text is not valid!</h4>
+					<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+				`);
+			}
+		});
+
+		} else {
+
+		Percept.retrieveRawProof(web3.toHex(pKey), (err, res) => {
+			console.log(err);
+			console.log(res);
+
+			if (res[0] == "0x0000000000000000000000000000000000000000") {
+				$("#action-content").html(`
+					<h4>Proof does not exist</h4>
+					<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+				`);
+			} else if (res[1] != 0) {
+				$("#action-content").html(`
+					<h4>Proof is revealed!</h4>
+					<h6>Proved by: ` + res[0] + `</h6>
+					<h6>Proof contents:</h6>
+					<a style="color:green">` + web3.toUtf8(res[1]) + `</a>
+						<h6></h6>
+					<h6>Proof hash: ` + res[2] + `</h6>
+					<h6>Proof key: ` + res[3] + `</h6>
+					<h6>Proof date: ` + convertTimestamp(res[4]) + `</h6>
+					<h6>Proof block number: ` + res[6] + `</h6>
+					<h6>Reveal date: ` + convertTimestamp(res[5]) + `</h6>
+					<h6>Reveal block number: ` + res[7] + `</h6>
+
+					<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+				`);
+			} else {
+				$("#action-content").html(`
+					<h4>Proof exists, but is not revealed!</h4>
+					<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+				`);
+			}
+		});
+
+		}
+
+	});
+
+});
+
+$(document).on("click", "#reveal-proof", function(event) {
+
+	$("#action-content").html(`
+
+  			<div class="form-group">
+    				<label for="proof-key">Proof key</label>
+				<input class="form-control" type="text" id="proof-key"></input>
+			</div>
+
+			<div class="form-group">
+    				<label for="proof-text">Proof text</label>
+				<textarea class="form-control" id="proof-text" rows="3"></textarea>
+	    			<small id="proof-help" class="form-text text-muted">Warning: This text will become available for all to see!</small>
+			</div>
+			<div class="form-group">
+    				<label for="gas-selector">Gas price (gwei)</label>
+			        <select class="form-control" id="gas-selector">
+			        	<option>1</option>
+			        	<option>2</option>
+			        	<option>3</option>
+			        	<option>4</option>
+			        	<option>5</option>
+			        	<option>6</option>
+			        	<option>7</option>
+			        	<option>8</option>
+			        	<option>9</option>
+			        	<option>10</option>
+			        	<option>11</option>
+			        	<option>12</option>
+			        	<option>13</option>
+			        	<option>14</option>
+			        	<option>15</option>
+			        	<option>16</option>
+			        	<option>17</option>
+			        	<option>18</option>
+			        	<option>19</option>
+			        	<option>20</option>
+			        </select>
+			        <small id="gas-help" class="form-text text-muted">The higher the gas price, the more you will pay, but the sooner your transaction will be confirmed.</small>
+			</div>
+			<button id="reveal-proof" type="button" class="btn btn-primary">Reveal</button>
+			<button id="cancel-action" type="button" class="btn btn-danger">Cancel</button>
+
+	`);
+
+	$("#reveal-proof").on("click", function(event) {
+
+		var pKey = $("#proof-key").val();
+		if (!pKey.startsWith("0x")) {
+			pKey = "0x" + pKey;
+		}
+
+		var text = $("#proof-text").val();
+
+		var gasPrice = $("#gas-selector").val();
+
+		revealProof(pKey, text, gasPrice);
+
+	});
+
+});
+
+$("#action-content").on("click", "#cancel-action", function(event) {
+
+	$("#action-content").html(ORIGINAL_ACTION);
+
+});
+
+console.log(web3.eth.coinbase);
+
+var expectingHash;
+var expectingReveal;
+
+var createEvent = Percept.ProofCreated();
+
+createEvent.watch((err, res) => {
+	if (res.transactionHash == expectingHash) {
+		$("#action-content").html(`
+
+			<h4>Your proof is now in the blockchain!</h4>
+			<p></p>
+			<p>Your proof key is:</p>
+			<span class="border border-success rounded" style="white-space: pre"> <a style="color:green">` + res.args.proofMapping + `</a> </span>
+			<p>Copy it somewhere safe - you will need it to reveal / verify your proof in future!</p>
+			<p></p>
+			<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+
+		`);
+	}
+});
+
+var revealEvent = Percept.ProofRevealed();
+
+revealEvent.watch((err, res) => {
+
+	if (res.transactionHash == expectingReveal) {
+
+		if (err) {
+
+			$("#action-content").html(`
+
+				<h4>There was an error!</h4>
+				<p></p>
+				<p>Was your proof correct?</p>
+				<p></p>
+				<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+
+			`);
+
+		} else {
+
+		$("#action-content").html(`
+
+			<h4>Your proof is now revealed in the blockchain!</h4>
+			<p></p>
+			<p>Your reveal key is:</p>
+			<span class="border border-success rounded" style="white-space: pre"> <a style="color:green">` + res.args.proofMapping + `</a> </span>
+			<p>You may now distribute your reveal key to prove your perception!</p>
+			<p></p>
+			<button id="cancel-action" type="button" class="btn btn-warning">Return</button>
+
+		`);
+
+		}
+
+	}
+
+});
+
+function createProof(text, gasPrice) {
+	var hash = web3.sha3(web3.toHex(text));
+
+	Percept.submitProof(hash, {from: web3.eth.coinbase, gasPrice: web3.toWei(gasPrice, "gwei")}, (err, res) => {
+		expectingHash = res;
+		$("#action-content").html(`
+
+			<h4>Awaiting inclusion in Ethereum blockchain. Please be patient!</h4>
+			<p>You may track its progress here: <a target="_blank" href="https://ropsten.etherscan.io/tx/` + res + `/">https://ropsten.etherscan.io/tx/` + res + `/</a></p>
+
+		`);
+
+	});
+}
+
+function revealProof(proofKey, text, gasPrice) {
+	var hash = web3.sha3(web3.toHex(text));
+
+	Percept.releaseProof(web3.toHex(proofKey), web3.toHex(text), {from: web3.eth.coinbase, gasPrice: web3.toWei(gasPrice, "gwei")}, (err, res) => {
+		expectingReveal = res;
+		$("#action-content").html(`
+
+			<h4>Awaiting inclusion in Ethereum blockchain. Please be patient!</h4>
+			<p>You may track its progress here: <a target="_blank" href="https://ropsten.etherscan.io/tx/` + res + `/">https://ropsten.etherscan.io/tx/` + res + `/</a></p>
+
+		`);
+
+	});
+}
+
+function convertTimestamp(timestamp) {
+  var d = new Date(timestamp * 1000),	// Convert the passed timestamp to milliseconds
+		yyyy = d.getFullYear(),
+		mm = ('0' + (d.getMonth() + 1)).slice(-2),	// Months are zero based. Add leading 0.
+		dd = ('0' + d.getDate()).slice(-2),			// Add leading 0.
+		hh = d.getHours(),
+		h = hh,
+		min = ('0' + d.getMinutes()).slice(-2),		// Add leading 0.
+		ampm = 'AM',
+		time;
+
+	if (hh > 12) {
+		h = hh - 12;
+		ampm = 'PM';
+	} else if (hh === 12) {
+		h = 12;
+		ampm = 'PM';
+	} else if (hh == 0) {
+		h = 12;
+	}
+
+	// ie: 2013-02-18, 8:35 AM
+	time = yyyy + '-' + mm + '-' + dd + ', ' + h + ':' + min + ' ' + ampm;
+
+	return time;
+}
+</script>
+</body>
+</html>
